@@ -1,0 +1,20 @@
+#向量库配置
+#向量库名字
+collection_name: agent
+#保存向量的文件夹
+persist_directory: chroma_db
+#top_k
+k: 3
+#知识库文件夹
+data_path: data
+#保存md5的文件
+md5_hex_store: md5.text
+#允许导入的格式
+allow_knowledge_file_type: ["txt", "pdf"]
+
+#每个文本块最大长度为 200 字符
+chunk_size: 200
+#文本块之间重叠 20 个字符
+chunk_overlap: 20
+#切割优先级分隔符列表
+separators: ["\n\n", "\n", ".", "!", "?", "。", "！", "？", " ", ""]
