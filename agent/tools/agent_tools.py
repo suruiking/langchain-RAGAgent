@@ -37,9 +37,12 @@ def rag_summarize(query: str) -> str:
 #查天气
 @tool(description="获取指定城市的实时天气，包含天气状况、气温、湿度等信息，以消息字符串的形式返回")
 def get_weather(city: str) -> str:
+    #Python 最常用的发送网络请求库
     import requests
     import urllib3
+    #关闭烦人的安全警告
     urllib3.disable_warnings()
+    #天气翻译字典：把接口返回的英文天气 → 翻译成中文
     weather_map = {
         "Sunny": "晴天", "Clear": "晴天", "Partly cloudy": "多云",
         "Cloudy": "阴天", "Overcast": "阴天", "Mist": "薄雾",
@@ -50,14 +53,17 @@ def get_weather(city: str) -> str:
     }
     try:
         url = f"https://wttr.in/{city}?format=j1"
+        # 发送网络请求：超时5秒，不验证SSL证书
         resp = requests.get(url, timeout=5, verify=False)
+        # 如果请求失败（404/500），直接抛出异常
         resp.raise_for_status()
+         #  解析接口返回的JSON数据，提取核心信息
         data = resp.json()
-        current = data["current_condition"][0]
-        desc_en = current["weatherDesc"][0]["value"]
-        desc = weather_map.get(desc_en, desc_en)
-        temp = current["temp_C"]
-        humidity = current["humidity"]
+        current = data["current_condition"][0]# 获取当前天气
+        desc_en = current["weatherDesc"][0]["value"]# 英文天气描述
+        desc = weather_map.get(desc_en, desc_en)# 转中文
+        temp = current["temp_C"] # 摄氏度气温
+        humidity = current["humidity"] # 湿度
         return f"{city}当前天气：{desc}，气温{temp}℃，湿度{humidity}%"
     except Exception as e:
         return f"天气查询失败：{str(e)}"
@@ -105,7 +111,8 @@ def generate_external_data():
     }
     :return:
     """
-    # 1. 懒加载：只有数据为空时，才执行加载（避免重复读文件，浪费性能）
+    #读取外部 CSV 格式的用户数据文件，整理成程序能快速查询的嵌套字典格式。
+   
     if not external_data:
         # 2. 找到外部CSV文件的路径
         external_data_path = get_abs_path(agent_conf["external_data_path"])
@@ -115,15 +122,16 @@ def generate_external_data():
 
          # 3. 打开CSV文件，逐行读取解析
         with open(external_data_path, "r", encoding="utf-8") as f:
+            #跳过表头
             for line in f.readlines()[1:]:
                 arr: list[str] = line.strip().split(",")
 
-                user_id: str = arr[0].replace('"', "")
-                feature: str = arr[1].replace('"', "")
-                efficiency: str = arr[2].replace('"', "")
-                consumables: str = arr[3].replace('"', "")
-                comparison: str = arr[4].replace('"', "")
-                time: str = arr[5].replace('"', "")
+                user_id: str = arr[0].replace('"', "")#用户ID
+                feature: str = arr[1].replace('"', "")#特征
+                efficiency: str = arr[2].replace('"', "")#效率
+                consumables: str = arr[3].replace('"', "")#耗材
+                comparison: str = arr[4].replace('"', "")#对比
+                time: str = arr[5].replace('"', "")#时间
                 
                   # 4. 整理成嵌套字典格式，存入全局变量 external_data
                 if user_id not in external_data:
@@ -136,7 +144,7 @@ def generate_external_data():
                     "对比": comparison,
                 }
 
-#查询外部数据工具
+#从内存字典里按 user_id + month 查数据
 @tool(description="从外部系统中获取指定用户在指定月份的使用记录，以纯字符串形式返回， 如果未检索到返回空字符串")
 def fetch_external_data(user_id: str, month: str) -> str:
     generate_external_data()

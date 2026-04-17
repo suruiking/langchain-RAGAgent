@@ -33,7 +33,7 @@ for message in st.session_state["message"]:
     #创建一个聊天气泡框，write把文字内容写进刚才创建的气泡框里
     st.chat_message(message["role"]).write(message["content"])
 
-# 用户输入提示词
+""" 接收用户输入 """
 prompt = st.chat_input()
 
 #最大长度
@@ -52,10 +52,10 @@ if prompt:
     response_messages = []
      # 显示加载动画：智能客服思考中...
     with st.spinner("智能客服思考中..."):
-        # 调用AI智能体的流式输出接口
+        # 返回生成器，包含最终答案
         res_stream = st.session_state["agent"].execute_stream(prompt)
         
-         # 嵌套函数：捕获流式内容 + 添加打字延迟效果
+         # 捕获流式内容 + 添加打字延迟效果
         def capture(generator, cache_list):
 
             for chunk in generator:     # 遍历AI返回的每一段文字
@@ -66,6 +66,7 @@ if prompt:
                     yield char# 逐字返回给前端
 
         # 3. 流式展示AI的回答（逐字打字效果）
+        #传入回答和response_messages空列表
         st.chat_message("assistant").write_stream(capture(res_stream, response_messages))
          # 4. 把AI回答保存到历史记录
         st.session_state["message"].append({"role": "assistant", "content": response_messages[-1]})

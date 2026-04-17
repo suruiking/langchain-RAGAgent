@@ -2,7 +2,7 @@
 .env
 
 # 向量数据库（本地生成，体积大）
-chroma_db/
+**/chroma_db/
 
 # 日志
 logs/
@@ -15,3 +15,7 @@ __pycache__/
 # 虚拟环境
 venv/
 .venv/
+
+# 其他
+md5.text
+*.code-workspace

@@ -33,16 +33,17 @@ class ReactAgent:
             middleware=[monitor_tool, log_before_model, report_prompt_switch],
         )
         
-    #流式输出回答
     def execute_stream(self, query: str):
+        #包装下
         input_dict = {
             "messages": [
                 {"role": "user", "content": query},
             ]
         }
 
-        # 第三个参数context就是上下文runtime中的信息，就是我们做提示词切换的标记
-        #self.agent.stream() 是 agent 的流式运行，stream_mode="values"按「数据块」返回回答
+       # 2. 【核心】调用底层AI智能体，真正去访问大模型，流式获取回答！
+       #self.agent.stream() 调用大模型时，大模型逐字生成回答     
+        #stream_mode="values"按「数据块」返回回答
         #context={"report": False}，关闭额外的日志 / 报告，只返回纯回答
         for chunk in self.agent.stream(input_dict, stream_mode="values", context={"report": False}):
             latest_message = chunk["messages"][-1]

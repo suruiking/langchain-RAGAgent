@@ -1,1 +1,2 @@
+#外部数据路径（CSV 格式的用户使用记录）
 external_data_path: data/external/records.csv

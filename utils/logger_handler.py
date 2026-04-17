@@ -45,7 +45,7 @@ def get_logger(
     if logger.handlers:
         return logger
 
-    # ===================== 控制台输出配置 =====================
+    # ===================== 控制台处理器：专门管屏幕打印=====================
     console_handler = logging.StreamHandler()# 控制台处理器
     console_handler.setLevel(console_level)# 控制台级别：INFO
     console_handler.setFormatter(DEFAULT_LOG_FORMAT) # 设置格式
@@ -53,11 +53,13 @@ def get_logger(
     logger.addHandler(console_handler)# 把控制台处理器添加到日志器
 
 
-    # ===================== 文件保存配置 =====================
+    # ===================== 文件处理器：专门管文件保存=====================
     if not log_file:        # 日志文件的存放路径
          # 自动生成日志文件名：logs/agent_20260405.log（按天命名）
         log_file = os.path.join(LOG_ROOT, f"{name}_{datetime.now().strftime('%Y%m%d')}.log")
 
+    #创建一个工具，把日志写进指定的文件
+    #logging.FileHandler 这个工具自带文件写入功能
     file_handler = logging.FileHandler(log_file, encoding='utf-8') # 文件处理器
     file_handler.setLevel(file_level)# 文件级别：DEBUG
     file_handler.setFormatter(DEFAULT_LOG_FORMAT)# 设置格式

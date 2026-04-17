@@ -21,13 +21,15 @@ from utils.logger_handler import logger
 
 #三个 @ 就是系统的自动开关：
 
-#监控 AI 所有工具调用，标记报告场景
+#调用工具就会触发
 #工具调用装饰器
 @wrap_tool_call
 def monitor_tool(
-        # 请求的数据封装
+        # 请求的数据封装,这个参数必须是「AI 调用工具的请求单」
         request: ToolCallRequest,
         # 执行的函数本身
+        #ToolMessage | Command：这个函数执行完返回的结果
+        #Callable[[ToolCallRequest],函数和参数
         handler: Callable[[ToolCallRequest], ToolMessage | Command],
 ) -> ToolMessage | Command:   
            # 打印日志：AI 要用哪个工具、传了什么参数
@@ -35,9 +37,11 @@ def monitor_tool(
     logger.info(f"[tool monitor]传入参数：{request.tool_call['args']}")
 
     try:
+         # 执行真正的工具函数
         result = handler(request)
         logger.info(f"[tool monitor]工具{request.tool_call['name']}调用成功")
 
+       # 如果调用了「生成报告填充上下文」工具，标记上下文：需要生成报告
         if request.tool_call['name'] == "fill_context_for_report":
             request.runtime.context["report"] = True
 

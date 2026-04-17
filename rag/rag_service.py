@@ -7,6 +7,7 @@
 """
 # 文档格式
 from langchain_core.documents import Document
+#转换成 纯文本字符串
 from langchain_core.output_parsers import StrOutputParser
 # 向量库服务
 from rag.vector_store import VectorStoreService
@@ -45,7 +46,7 @@ class RagSummarizeService(object):
          
         return self.retriever.invoke(query)
 
-    #最终问答入口
+    #检索，返回答案
     def rag_summarize(self, query: str) -> str:
 
         # 1. 根据用户问题，检索相关文档
@@ -58,7 +59,7 @@ class RagSummarizeService(object):
             counter += 1
             context += f"【参考资料{counter}】: 参考资料：{doc.page_content} | 参考元数据：{doc.metadata}\n"
 
-        # 3. 把【用户问题】和【参考资料】填入模板 → 丢给模型 → 返回答案
+        # 3. 
         #就是先根据用户问题检索文档。然后把文档和问题都发给大模型
         #流水线
         return self.chain.invoke(

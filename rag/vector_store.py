@@ -20,16 +20,24 @@ import os
 class VectorStoreService:
     #初始化向量库和切割器
     def __init__(self):
+        #创建向量库实例
         self.vector_store = Chroma(
+            #名字
             collection_name=chroma_conf["collection_name"],
+            #模型
             embedding_function=embed_model,
+            #保存向量的文件夹
             persist_directory=chroma_conf["persist_directory"],
         )
 
         self.spliter = RecursiveCharacterTextSplitter(
+            #每个小文本片段的最大长度
             chunk_size=chroma_conf["chunk_size"],
+            #重叠 20 个字符
             chunk_overlap=chroma_conf["chunk_overlap"],
+            #切割分隔符
             separators=chroma_conf["separators"],
+            #指定计算文本长度的函数
             length_function=len,
         )
 
@@ -49,12 +57,13 @@ class VectorStoreService:
         def check_md5_hex(md5_for_check: str):
             # 如果MD5记录文件不存在，创建空文件
             if not os.path.exists(get_abs_path(chroma_conf["md5_hex_store"])):
-                # 创建文件
+                # 没有就创建，有就打开
                 open(get_abs_path(chroma_conf["md5_hex_store"]), "w", encoding="utf-8").close()
                 return False            # md5 没处理过
              # 读取MD5记录文件，逐行对比
             with open(get_abs_path(chroma_conf["md5_hex_store"]), "r", encoding="utf-8") as f:
                 for line in f.readlines():
+                    #只保留干净内容
                     line = line.strip()
                     if line == md5_for_check:
                         return True     # md5 处理过
@@ -69,6 +78,7 @@ class VectorStoreService:
         
         #根据文件类型加载文档
         def get_file_documents(read_path: str):
+            #endswith，判断字符串是否以指定的后缀结尾
             if read_path.endswith("txt"):
                 return txt_loader(read_path) # 加载TXT
 
@@ -77,7 +87,7 @@ class VectorStoreService:
 
             return []
         #====================正式入库====================================
-
+        """找到文件夹下面的txt和pdf向量化并入库   """
         # 1. 找出所有 PDF、TXT 文件
         #声明一个变量叫 allowed_files_path，规定它必须是「存储字符串的列表」
         #listdir_with_allowed_type列出指定文件夹下，指定类型的所有文件
